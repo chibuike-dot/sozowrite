@@ -79,7 +79,6 @@ async def lifespan(app: FastAPI):
 
     # Initialize rate limiter
     redis_connection = redis.from_url("redis://localhost")
-    await limiter.init(redis_connection)
 
     yield
 
