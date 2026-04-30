@@ -258,6 +258,17 @@ async def get_model_priority() -> List[Dict[str, Any]]:
             for row in rows
         ]
 
+async def get_model_cost(provider: str, model_name: str) -> float:
+    """Get the cost per token for a specific model"""
+    async with get_db_connection() as db:
+        cursor = await db.execute("""
+        SELECT cost_per_token
+        FROM model_priorities
+        WHERE provider = ? AND model_name = ? AND is_active = TRUE
+        """, (provider, model_name))
+        row = await cursor.fetchone()
+        return row[0] if row else 0.0
+
 async def get_fallback_chain() -> List[Dict[str, Any]]:
     """Get the fallback chain ordered by priority"""
     async with get_db_connection() as db:

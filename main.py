@@ -154,11 +154,17 @@ async def aggregate(
     for model_info in prioritized_models:
         provider = model_info['provider']
         model_name = model_info['model_name']
-        config = PROVIDER_CONFIGS[provider]
+        config = PROVIDER_CONFIGS.get(Provider(provider))
+
+        if not config:
+            continue
 
         try:
             # Check rate limits and quotas
-            if usage[provider]["monthly_usage"] >= config.free_tier_limit and config.priority == ModelPriority.FREE:
+            provider_usage = usage.get("usage_by_provider", {}).get(provider, {})
+            monthly_usage = provider_usage.get("monthly_tokens", 0)
+
+            if monthly_usage >= config.free_tier_limit and config.priority == ModelPriority.FREE:
                 logger.warning(f"Free tier limit reached for {provider}, skipping")
                 continue
 
@@ -207,12 +213,12 @@ async def aggregate(
                 )
 
                 results.append(AIModelResponse(
-                    model_name=f"{provider.value}-{model_name}",
+                    model_name=f"{provider}-{model_name}",
                     response=model_response,
                     confidence=0.95,  # Would normally come from response
                     tokens_used=tokens_used,
                     cost=cost,
-                    provider=provider.value
+                    provider=provider
                 ))
 
                 # If we got a successful response and don't need all models, we can stop
@@ -222,7 +228,7 @@ async def aggregate(
         except Exception as e:
             logger.error(f"Error with {provider}-{model_name}: {str(e)}")
             errors.append({
-                "provider": provider.value,
+                "provider": provider,
                 "model": model_name,
                 "error": str(e)
             })
@@ -233,9 +239,9 @@ async def aggregate(
         for fallback in fallback_chain:
             fallback_provider = fallback['provider']
             fallback_model = fallback['model_name']
-            if fallback_provider in PROVIDER_CONFIGS:
+            if fallback_provider in [p.value for p in Provider]:
                 try:
-                    config = PROVIDER_CONFIGS[fallback_provider]
+                    config = PROVIDER_CONFIGS[Provider(fallback_provider)]
                     async with httpx.AsyncClient(timeout=30.0) as client:
                         headers = {
                             "Authorization": f"Bearer {config.api_key}",
@@ -270,12 +276,12 @@ async def aggregate(
                             )
 
                             results.append(AIModelResponse(
-                                model_name=f"{fallback_provider.value}-{fallback_model}",
+                                model_name=f"{fallback_provider}-{fallback_model}",
                                 response=model_response,
                                 confidence=0.9,  # Slightly lower for fallback
                                 tokens_used=tokens_used,
                                 cost=cost,
-                                provider=fallback_provider.value,
+                                provider=fallback_provider,
                                 is_fallback=True
                             ))
                             break
@@ -311,7 +317,7 @@ async def get_usage(
     """
     Get usage statistics for an API key
     """
-    usage_data = await get_api_key_usage(api_key, provider)
+    usage_data = await get_api_key_usage(api_key, provider.value if provider else None)
     return JSONResponse(content=jsonable_encoder(usage_data))
 
 @app.exception_handler(RateLimitExceeded)
