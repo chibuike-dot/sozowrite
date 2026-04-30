@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import logging
 from contextlib import asynccontextmanager
 
-from .models import (
+from models import (
     UsageLog,
     ModelPriority,
     ProviderConfig
