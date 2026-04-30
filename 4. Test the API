@@ -1,0 +1,4 @@
+curl -X POST "http://localhost:8000/aggregate" \
+  -H "X-API-Key: your_test_key" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Tell me a joke"}'
