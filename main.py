@@ -90,6 +90,8 @@ async def lifespan(app: FastAPI):
 
     # Initialize rate limiter
     redis_connection = redis.from_url("redis://localhost")
+    app.state.limiter = limiter
+    limiter.redis = redis_connection
 
     yield
 
@@ -102,7 +104,6 @@ app = FastAPI(lifespan=lifespan,
               version="1.0.0")
 
 # Add rate limiting middleware
-app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
 # Security
@@ -214,15 +215,15 @@ async def call_provider(
           response_model=AggregationResponse)
 @limiter.limit("10/minute")
 async def aggregate(
-    request: AggregationRequest,
-    api_key: str = Depends(get_api_key),
-    fastapi_request: Request = None
+    request: Request,
+    aggregation_request: AggregationRequest,
+    api_key: str = Depends(get_api_key)
 ):
     """
     Aggregate responses from multiple AI models with priority-based routing and fallback.
     """
     # Validate request
-    if not request.prompt:
+    if not aggregation_request.prompt:
         raise HTTPException(status_code=400, detail="Prompt is required")
 
     # Get usage stats for this API key
@@ -269,8 +270,8 @@ async def aggregate(
         result = await call_provider(
             provider=provider,
             model_name=model_name,
-            prompt=request.prompt,
-            max_tokens=request.max_tokens or 1000,
+            prompt=aggregation_request.prompt,
+            max_tokens=aggregation_request.max_tokens or 1000,
             api_key=api_key
         )
 
@@ -290,7 +291,7 @@ async def aggregate(
             )
 
             # If we got a successful response and don't need all models, we can stop
-            if not request.require_all_models and results:
+            if not aggregation_request.require_all_models and results:
                 break
         else:
             errors.append({
@@ -319,8 +320,8 @@ async def aggregate(
             fallback_result = await call_provider(
                 provider=fallback_provider,
                 model_name=fallback_model,
-                prompt=request.prompt,
-                max_tokens=request.max_tokens or 1000,
+                prompt=aggregation_request.prompt,
+                max_tokens=aggregation_request.max_tokens or 1000,
                 api_key=api_key
             )
 
