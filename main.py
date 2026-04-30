@@ -3,8 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from fastapi.limiter import FastAPILimiter
-from fastapi.limiter.depends import RateLimiter
 import redis.asyncio as redis
 import asyncio
 from typing import List, Optional, Dict, Any
@@ -13,6 +11,10 @@ import httpx
 import logging
 from contextlib import asynccontextmanager
 from enum import Enum
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from .database import (
     init_db,
@@ -68,6 +70,8 @@ PROVIDER_CONFIGS: Dict[Provider, ProviderConfig] = {
     )
 }
 
+limiter = Limiter(key_func=get_remote_address)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize database
@@ -75,7 +79,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize rate limiter
     redis_connection = redis.from_url("redis://localhost")
-    await FastAPILimiter.init(redis_connection)
+    await limiter.init(redis_connection)
 
     yield
 
@@ -86,6 +90,10 @@ app = FastAPI(lifespan=lifespan,
               title="AI Aggregator API",
               description="Priority-based AI model aggregator with fallback",
               version="1.0.0")
+
+# Add rate limiting middleware
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
 
 # Security
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
@@ -116,8 +124,8 @@ async def root():
     }
 
 @app.post("/aggregate",
-          response_model=AggregationResponse,
-          dependencies=[Depends(RateLimiter(times=10, minutes=1))])
+          response_model=AggregationResponse)
+@limiter.limit("10/minute")
 async def aggregate(
     request: AggregationRequest,
     api_key: str = Depends(get_api_key),
@@ -305,6 +313,13 @@ async def get_usage(
     """
     usage_data = await get_api_key_usage(api_key, provider)
     return JSONResponse(content=jsonable_encoder(usage_data))
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=429,
+        content={"error": "Too many requests. Please try again later."},
+    )
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
