@@ -15,6 +15,8 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+import os
+from pydantic import ValidationError
 
 from database import (
     init_db,
@@ -30,7 +32,8 @@ from models import (
     AggregationResponse,
     ProviderConfig,
     UsageLog,
-    ModelPriority
+    ModelPriority,
+    ErrorResponse
 )
 
 # Initialize logging
@@ -42,29 +45,37 @@ class Provider(str, Enum):
     GEMINI = "gemini"
     DEEPSEEK = "deepseek"
 
-# Provider configurations (would normally come from secure config)
+# Load API keys from environment
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+
+# Provider configurations
 PROVIDER_CONFIGS: Dict[Provider, ProviderConfig] = {
     Provider.MISTRAL: ProviderConfig(
         base_url="https://api.mistral.ai/v1",
+        api_key=MISTRAL_API_KEY,
         api_key_env="MISTRAL_API_KEY",
         free_tier_limit=1000,
-        cost_per_token=0.000002,  # $0.000002 per token
+        cost_per_token=0.000002,
         priority=ModelPriority.FREE,
         models=["mistral-tiny", "mistral-small"]
     ),
     Provider.GEMINI: ProviderConfig(
         base_url="https://generativelanguage.googleapis.com/v1",
+        api_key=GEMINI_API_KEY,
         api_key_env="GEMINI_API_KEY",
         free_tier_limit=500,
-        cost_per_token=0.0000025,  # $0.0000025 per token
+        cost_per_token=0.0000025,
         priority=ModelPriority.PAID,
         models=["gemini-1.5-flash", "gemini-1.5-pro"]
     ),
     Provider.DEEPSEEK: ProviderConfig(
         base_url="https://api.deepseek.com/v1",
+        api_key=DEEPSEEK_API_KEY,
         api_key_env="DEEPSEEK_API_KEY",
         free_tier_limit=2000,
-        cost_per_token=0.0000015,  # $0.0000015 per token
+        cost_per_token=0.0000015,
         priority=ModelPriority.FREE,
         models=["deepseek-chat", "deepseek-coder"]
     )
@@ -122,6 +133,83 @@ async def root():
         "status": "operational"
     }
 
+async def call_provider(
+    provider: Provider,
+    model_name: str,
+    prompt: str,
+    max_tokens: int,
+    api_key: str
+) -> Optional[AIModelResponse]:
+    """Helper function to call a single provider with proper error handling"""
+    config = PROVIDER_CONFIGS.get(provider)
+    if not config or not config.api_key:
+        logger.error(f"Provider {provider} not configured properly")
+        return None
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            headers = {
+                "Authorization": f"Bearer {config.api_key}",
+                "Content-Type": "application/json"
+            }
+
+            payload = {
+                "model": model_name,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": max_tokens
+            }
+
+            # Special handling for Gemini API format
+            if provider == Provider.GEMINI:
+                payload = {
+                    "model": f"models/{model_name}",
+                    "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                    "generationConfig": {
+                        "maxOutputTokens": max_tokens
+                    }
+                }
+                endpoint = f"{config.base_url}/models/{model_name}:generateContent"
+            else:
+                endpoint = f"{config.base_url}/chat/completions"
+
+            response = await client.post(endpoint, json=payload, headers=headers)
+            response.raise_for_status()
+
+            response_data = response.json()
+
+            # Handle different response formats
+            if provider == Provider.GEMINI:
+                model_response = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                tokens_used = len(model_response.split())  # Simple approximation
+            else:
+                model_response = response_data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                tokens_used = response_data.get("usage", {}).get("total_tokens", 0)
+
+            if not model_response:
+                logger.error(f"No response content from {provider}-{model_name}")
+                return None
+
+            cost = tokens_used * config.cost_per_token
+
+            return AIModelResponse(
+                model_name=f"{provider.value}-{model_name}",
+                response=model_response,
+                confidence=0.95,
+                tokens_used=tokens_used,
+                cost=cost,
+                provider=provider.value
+            )
+
+    except httpx.HTTPStatusError as e:
+        logger.error(f"HTTP error from {provider}-{model_name}: {str(e)} - {e.response.text if hasattr(e, 'response') else 'No response'}")
+        return None
+    except (httpx.RequestError, ValidationError, KeyError) as e:
+        logger.error(f"Error processing {provider}-{model_name} response: {str(e)}")
+        return None
+    except Exception as e:
+        logger.error(f"Unexpected error with {provider}-{model_name}: {str(e)}", exc_info=True)
+        return None
+
 @app.post("/aggregate",
           response_model=AggregationResponse)
 @limiter.limit("10/minute")
@@ -151,151 +239,124 @@ async def aggregate(
 
     # Try models in priority order
     for model_info in prioritized_models:
-        provider = model_info['provider']
+        provider_name = model_info['provider']
         model_name = model_info['model_name']
-        config = PROVIDER_CONFIGS.get(Provider(provider))
-
-        if not config:
-            continue
 
         try:
-            # Check rate limits and quotas
-            provider_usage = usage.get("usage_by_provider", {}).get(provider, {})
-            monthly_usage = provider_usage.get("monthly_tokens", 0)
+            provider = Provider(provider_name)
+        except ValueError:
+            logger.error(f"Invalid provider name: {provider_name}")
+            continue
 
-            if monthly_usage >= config.free_tier_limit and config.priority == ModelPriority.FREE:
-                logger.warning(f"Free tier limit reached for {provider}, skipping")
-                continue
-
-            # Make API call
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                headers = {
-                    "Authorization": f"Bearer {config.api_key}",
-                    "Content-Type": "application/json"
-                }
-
-                payload = {
-                    "model": model_name,
-                    "messages": [{"role": "user", "content": request.prompt}],
-                    "max_tokens": request.max_tokens or 1000
-                }
-
-                response = await client.post(
-                    f"{config.base_url}/chat/completions",
-                    json=payload,
-                    headers=headers
-                )
-
-                if response.status_code != 200:
-                    raise HTTPException(
-                        status_code=response.status_code,
-                        detail=f"Provider {provider} error: {response.text}"
-                    )
-
-                response_data = response.json()
-                model_response = response_data["choices"][0]["message"]["content"]
-                tokens_used = response_data["usage"]["total_tokens"]
-
-                # Calculate cost
-                cost = tokens_used * config.cost_per_token
-                total_tokens += tokens_used
-                total_cost += cost
-
-                # Log usage
-                await log_usage(
-                    api_key=api_key,
-                    provider=provider,
-                    model_name=model_name,
-                    tokens_used=tokens_used,
-                    cost=cost,
-                    timestamp=datetime.utcnow()
-                )
-
-                results.append(AIModelResponse(
-                    model_name=f"{provider}-{model_name}",
-                    response=model_response,
-                    confidence=0.95,  # Would normally come from response
-                    tokens_used=tokens_used,
-                    cost=cost,
-                    provider=provider
-                ))
-
-                # If we got a successful response and don't need all models, we can stop
-                if not request.require_all_models and results:
-                    break
-
-        except Exception as e:
-            logger.error(f"Error with {provider}-{model_name}: {str(e)}")
+        config = PROVIDER_CONFIGS.get(provider)
+        if not config:
             errors.append({
-                "provider": provider,
+                "provider": provider_name,
                 "model": model_name,
-                "error": str(e)
+                "error": "Provider not configured"
             })
             continue
 
-    if not results and errors:
-        # If all providers failed, try fallback chain
+        # Check rate limits and quotas
+        provider_usage = usage.get("usage_by_provider", {}).get(provider_name, {})
+        monthly_usage = provider_usage.get("monthly_tokens", 0)
+
+        if monthly_usage >= config.free_tier_limit and config.priority == ModelPriority.FREE:
+            logger.warning(f"Free tier limit reached for {provider}, skipping")
+            continue
+
+        # Call the provider
+        result = await call_provider(
+            provider=provider,
+            model_name=model_name,
+            prompt=request.prompt,
+            max_tokens=request.max_tokens or 1000,
+            api_key=api_key
+        )
+
+        if result:
+            results.append(result)
+            total_tokens += result.tokens_used
+            total_cost += result.cost
+
+            # Log successful usage
+            await log_usage(
+                api_key=api_key,
+                provider=provider_name,
+                model_name=model_name,
+                tokens_used=result.tokens_used,
+                cost=result.cost,
+                timestamp=datetime.utcnow()
+            )
+
+            # If we got a successful response and don't need all models, we can stop
+            if not request.require_all_models and results:
+                break
+        else:
+            errors.append({
+                "provider": provider_name,
+                "model": model_name,
+                "error": "Failed to get response from provider"
+            })
+
+    # If no results yet, try fallback chain
+    if not results and fallback_chain:
         for fallback in fallback_chain:
-            fallback_provider = fallback['provider']
+            fallback_provider_name = fallback['provider']
             fallback_model = fallback['model_name']
-            if fallback_provider in [p.value for p in Provider]:
-                try:
-                    config = PROVIDER_CONFIGS[Provider(fallback_provider)]
-                    async with httpx.AsyncClient(timeout=30.0) as client:
-                        headers = {
-                            "Authorization": f"Bearer {config.api_key}",
-                            "Content-Type": "application/json"
-                        }
 
-                        payload = {
-                            "model": fallback_model,
-                            "messages": [{"role": "user", "content": request.prompt}],
-                            "max_tokens": request.max_tokens or 1000
-                        }
+            try:
+                fallback_provider = Provider(fallback_provider_name)
+            except ValueError:
+                logger.error(f"Invalid fallback provider name: {fallback_provider_name}")
+                continue
 
-                        response = await client.post(
-                            f"{config.base_url}/chat/completions",
-                            json=payload,
-                            headers=headers
-                        )
+            config = PROVIDER_CONFIGS.get(fallback_provider)
+            if not config:
+                continue
 
-                        if response.status_code == 200:
-                            response_data = response.json()
-                            model_response = response_data["choices"][0]["message"]["content"]
-                            tokens_used = response_data["usage"]["total_tokens"]
-                            cost = tokens_used * config.cost_per_token
+            # Call the fallback provider
+            fallback_result = await call_provider(
+                provider=fallback_provider,
+                model_name=fallback_model,
+                prompt=request.prompt,
+                max_tokens=request.max_tokens or 1000,
+                api_key=api_key
+            )
 
-                            await log_usage(
-                                api_key=api_key,
-                                provider=fallback_provider,
-                                model_name=fallback_model,
-                                tokens_used=tokens_used,
-                                cost=cost,
-                                timestamp=datetime.utcnow()
-                            )
+            if fallback_result:
+                fallback_result.is_fallback = True
+                results.append(fallback_result)
+                total_tokens += fallback_result.tokens_used
+                total_cost += fallback_result.cost
 
-                            results.append(AIModelResponse(
-                                model_name=f"{fallback_provider}-{fallback_model}",
-                                response=model_response,
-                                confidence=0.9,  # Slightly lower for fallback
-                                tokens_used=tokens_used,
-                                cost=cost,
-                                provider=fallback_provider,
-                                is_fallback=True
-                            ))
-                            break
-                except Exception as e:
-                    logger.error(f"Fallback error with {fallback_provider}-{fallback_model}: {str(e)}")
-                    continue
+                # Log fallback usage
+                await log_usage(
+                    api_key=api_key,
+                    provider=fallback_provider_name,
+                    model_name=fallback_model,
+                    tokens_used=fallback_result.tokens_used,
+                    cost=fallback_result.cost,
+                    timestamp=datetime.utcnow()
+                )
+                break
+            else:
+                errors.append({
+                    "provider": fallback_provider_name,
+                    "model": fallback_model,
+                    "error": "Fallback provider failed"
+                })
 
     if not results:
+        error_details = {
+            "message": "All providers failed to return a valid response",
+            "errors": errors,
+            "suggested_action": "Check provider configurations and API keys"
+        }
+        logger.error("All providers failed: " + str(error_details))
         raise HTTPException(
             status_code=503,
-            detail={
-                "message": "All providers failed",
-                "errors": errors,
-                "suggested_action": "Try again later or contact support"
-            }
+            detail=error_details
         )
 
     return AggregationResponse(
@@ -341,7 +402,7 @@ async def generic_exception_handler(request, exc):
         content={
             "error": "Internal server error",
             "message": "An unexpected error occurred",
-            "request_id": request.state.request_id if hasattr(request.state, 'request_id') else None
+            "request_id": getattr(request.state, 'request_id', None)
         },
     )
 
