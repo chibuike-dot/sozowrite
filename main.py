@@ -16,7 +16,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
-from .database import (
+from database import (
     init_db,
     log_usage,
     get_api_key_usage,
@@ -24,7 +24,7 @@ from .database import (
     get_model_cost,
     get_fallback_chain
 )
-from .models import (
+from models import (
     AIModelResponse,
     AggregationRequest,
     AggregationResponse,
