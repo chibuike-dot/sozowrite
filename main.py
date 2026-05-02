@@ -40,7 +40,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import os
 
-os.makedirs("/root/myproject/static", exist_ok=True)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/app")
