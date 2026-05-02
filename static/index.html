@@ -5,209 +5,541 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SozoWrite — Where Ideas Become Whole</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-:root {
-  --primary: #7c5cfc;
-  --primary2: #a78bfa;
-  --accent: #f472b6;
-  --bg: #07070f;
-  --card: #0f0f1e;
-  --card2: #13132a;
-  --border: #ffffff12;
-  --text: #e2e8f0;
-  --muted: #94a3b8;
-  --green: #4ade80;
-  --gold: #fbbf24;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --gold:#f5c518;
+  --gold2:#ffd700;
+  --gold3:#ffec8b;
+  --purple:#7c3aed;
+  --purple2:#9d4edd;
+  --purple3:#c084fc;
+  --bg1:#0a0015;
+  --bg2:#0f0025;
+  --glass:rgba(255,255,255,0.05);
+  --glass2:rgba(255,255,255,0.08);
+  --glass3:rgba(255,255,255,0.12);
+  --border:rgba(255,255,255,0.1);
+  --border2:rgba(245,197,24,0.3);
+  --text:#f0e6ff;
+  --muted:#9b8fb0;
 }
-body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg1);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;
+  top:-50%;left:-50%;
+  width:200%;height:200%;
+  background:
+    radial-gradient(ellipse at 20% 20%,rgba(124,58,237,0.15) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 80%,rgba(245,197,24,0.08) 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 50%,rgba(157,78,221,0.05) 0%,transparent 70%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* GLASSMORPHISM CARD */
+.glass{
+  background:var(--glass);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--border);
+  border-radius:20px;
+}
+.glass-gold{
+  background:linear-gradient(135deg,rgba(245,197,24,0.08),rgba(124,58,237,0.08));
+  backdrop-filter:blur(20px);
+  border:1px solid var(--border2);
+  border-radius:20px;
+}
 
 /* LANDING */
-.landing { min-height: 100vh; display: flex; flex-direction: column; }
-.nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid var(--border); }
-.logo { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.nav-links { display: flex; gap: 16px; align-items: center; }
-.nav-link { color: var(--muted); font-size: 14px; cursor: pointer; padding: 6px 12px; border-radius: 6px; border: none; background: none; }
-.nav-link:hover { color: var(--text); }
-.btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; border: none; padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
-.btn-primary:hover { opacity: 0.9; }
-.hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 20px; }
-.hero-badge { background: var(--primary)22; border: 1px solid var(--primary)44; color: var(--primary2); padding: 6px 16px; border-radius: 20px; font-size: 13px; margin-bottom: 24px; display: inline-block; }
-.hero h1 { font-size: clamp(32px, 6vw, 64px); font-weight: 900; line-height: 1.15; margin-bottom: 20px; }
-.hero h1 span { background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.hero p { font-size: 18px; color: var(--muted); max-width: 560px; line-height: 1.7; margin-bottom: 36px; }
-.hero-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
-.btn-outline { border: 1px solid var(--border); color: var(--text); background: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; cursor: pointer; }
-.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
-.features-row { display: flex; gap: 24px; margin-top: 60px; flex-wrap: wrap; justify-content: center; }
-.feature-chip { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
-.feature-chip span { color: var(--primary2); }
-.stats-row { display: flex; gap: 40px; margin-top: 50px; flex-wrap: wrap; justify-content: center; }
-.stat-item { text-align: center; }
-.stat-item .num { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.stat-item .label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.landing{display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1;}
+
+/* NAV */
+.nav{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:20px 40px;
+  background:rgba(10,0,21,0.8);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+}
+.logo{
+  font-size:22px;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),var(--purple3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  display:flex;align-items:center;gap:8px;
+}
+.nav-links{display:flex;gap:12px;align-items:center;}
+.nav-btn{
+  color:var(--muted);font-size:14px;cursor:pointer;
+  padding:8px 16px;border-radius:10px;border:none;
+  background:none;transition:all 0.2s;
+}
+.nav-btn:hover{color:var(--text);background:var(--glass);}
+.btn-gold{
+  background:linear-gradient(135deg,var(--gold),#e6a800);
+  color:#0a0015;border:none;padding:10px 22px;
+  border-radius:10px;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;
+  box-shadow:0 4px 20px rgba(245,197,24,0.3);
+}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(245,197,24,0.4);}
+
+/* HERO */
+.hero{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:80px 20px 60px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,rgba(245,197,24,0.1),rgba(124,58,237,0.1));
+  border:1px solid var(--border2);
+  color:var(--gold);padding:8px 20px;border-radius:30px;
+  font-size:13px;font-weight:500;margin-bottom:32px;
+  backdrop-filter:blur(10px);
+}
+.hero h1{
+  font-size:clamp(36px,7vw,72px);font-weight:900;
+  line-height:1.1;margin-bottom:24px;
+  letter-spacing:-2px;
+}
+.hero h1 .line1{color:var(--text);}
+.hero h1 .line2{
+  background:linear-gradient(135deg,var(--gold),var(--gold2),var(--purple3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero p{
+  font-size:18px;color:var(--muted);max-width:580px;
+  line-height:1.8;margin-bottom:40px;font-weight:400;
+}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:60px;}
+.btn-outline-gold{
+  border:1px solid var(--border2);color:var(--gold);
+  background:rgba(245,197,24,0.05);padding:14px 28px;
+  border-radius:12px;font-size:15px;font-weight:600;
+  cursor:pointer;backdrop-filter:blur(10px);transition:all 0.2s;
+}
+.btn-outline-gold:hover{background:rgba(245,197,24,0.1);}
+
+/* FEATURE CHIPS */
+.chips{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:60px;}
+.chip-item{
+  background:var(--glass);backdrop-filter:blur(10px);
+  border:1px solid var(--border);border-radius:30px;
+  padding:10px 20px;font-size:13px;color:var(--muted);
+  display:flex;align-items:center;gap:8px;
+}
+.chip-item span{color:var(--gold);}
+
+/* STATS */
+.stats{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;}
+.stat{text-align:center;}
+.stat .num{
+  font-size:36px;font-weight:900;
+  background:linear-gradient(135deg,var(--gold),var(--purple3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.stat .label{font-size:13px;color:var(--muted);margin-top:4px;}
 
 /* PRICING */
-.pricing-section { padding: 60px 20px; text-align: center; border-top: 1px solid var(--border); }
-.pricing-section h2 { font-size: 32px; font-weight: 800; margin-bottom: 10px; }
-.pricing-section p { color: var(--muted); margin-bottom: 40px; }
-.pricing-cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; max-width: 800px; margin: 0 auto; }
-.pricing-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; width: 240px; text-align: left; }
-.pricing-card.popular { border-color: var(--primary); position: relative; }
-.popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; padding: 4px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
-.pricing-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-.pricing-card .price { font-size: 36px; font-weight: 900; color: var(--primary2); margin: 12px 0; }
-.pricing-card .price span { font-size: 14px; color: var(--muted); font-weight: 400; }
-.pricing-card ul { list-style: none; margin: 16px 0 24px; }
-.pricing-card ul li { font-size: 13px; color: var(--muted); padding: 5px 0; display: flex; align-items: center; gap: 8px; }
-.pricing-card ul li::before { content: '✓'; color: var(--green); font-weight: 700; }
-.pricing-card .plan-btn { width: 100%; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; }
-.free-btn { background: var(--card2); color: var(--text); border: 1px solid var(--border) !important; }
-.pro-btn { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; }
+.pricing{padding:80px 20px;text-align:center;position:relative;z-index:1;}
+.pricing h2{
+  font-size:40px;font-weight:900;margin-bottom:12px;
+  background:linear-gradient(135deg,var(--gold),var(--purple3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.pricing p{color:var(--muted);margin-bottom:50px;font-size:16px;}
+.pricing-cards{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;max-width:900px;margin:0 auto;}
+.price-card{
+  background:var(--glass);backdrop-filter:blur(20px);
+  border:1px solid var(--border);border-radius:24px;
+  padding:36px 28px;width:260px;text-align:left;
+  position:relative;transition:transform 0.2s;
+}
+.price-card:hover{transform:translateY(-4px);}
+.price-card.featured{
+  background:linear-gradient(135deg,rgba(245,197,24,0.08),rgba(124,58,237,0.08));
+  border-color:var(--border2);
+  box-shadow:0 0 40px rgba(245,197,24,0.1);
+}
+.featured-badge{
+  position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--gold),#e6a800);
+  color:#0a0015;padding:5px 20px;border-radius:20px;
+  font-size:12px;font-weight:800;white-space:nowrap;
+}
+.price-card h3{font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text);}
+.price-card .amount{
+  font-size:42px;font-weight:900;
+  background:linear-gradient(135deg,var(--gold),var(--purple3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin:16px 0 4px;
+}
+.price-card .per{font-size:14px;color:var(--muted);margin-bottom:24px;}
+.price-card ul{list-style:none;margin-bottom:28px;}
+.price-card ul li{
+  font-size:14px;color:var(--muted);padding:6px 0;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);
+}
+.price-card ul li:last-child{border-bottom:none;}
+.price-card ul li::before{content:'✦';color:var(--gold);font-size:10px;}
+.plan-btn{
+  width:100%;padding:13px;border-radius:12px;
+  font-size:14px;font-weight:700;cursor:pointer;border:none;
+  transition:all 0.2s;
+}
+.plan-btn-gold{
+  background:linear-gradient(135deg,var(--gold),#e6a800);
+  color:#0a0015;box-shadow:0 4px 20px rgba(245,197,24,0.3);
+}
+.plan-btn-gold:hover{transform:translateY(-1px);}
+.plan-btn-glass{
+  background:var(--glass2);color:var(--text);
+  border:1px solid var(--border);
+}
+.plan-btn-glass:hover{background:var(--glass3);}
 
 /* APP */
-.app { display: none; min-height: 100vh; flex-direction: column; }
-.app-header { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
-.app-logo { font-size: 18px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.plan-tag { background: var(--primary)22; border: 1px solid var(--primary)44; color: var(--primary2); padding: 4px 12px; border-radius: 20px; font-size: 12px; }
-.app-body { display: flex; flex: 1; }
-.sidebar { width: 220px; background: var(--card); border-right: 1px solid var(--border); padding: 20px 14px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-.sidebar-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin: 10px 0 6px; }
-.sidebar-btn { padding: 9px 12px; border-radius: 8px; font-size: 13px; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 8px; border: none; background: none; width: 100%; text-align: left; }
-.sidebar-btn:hover { background: var(--card2); color: var(--text); }
-.sidebar-btn.active { background: var(--primary)22; color: var(--primary2); }
-.main { flex: 1; padding: 24px; overflow-y: auto; max-width: 900px; }
-.section { display: none; }
-.section.active { display: block; }
-.section-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
-.section-sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
-.form-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 16px; }
-.form-card h4 { font-size: 14px; color: var(--primary2); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-select, textarea, input[type=text], input[type=password] { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; margin-bottom: 14px; outline: none; }
-select:focus, textarea:focus, input:focus { border-color: var(--primary); }
-textarea { resize: vertical; line-height: 1.6; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
-.chip { padding: 9px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); cursor: pointer; text-align: center; font-size: 12px; transition: all 0.2s; }
-.chip:hover { border-color: var(--primary)55; }
-.chip.active-type { border-color: var(--primary); color: var(--primary2); background: var(--primary)11; }
-.chip.active-tone { border-color: var(--accent); color: var(--accent); background: var(--accent)11; }
-.gen-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px; margin-top: 4px; }
-.gen-btn:disabled { background: #333; cursor: not-allowed; opacity: 0.5; }
-.loading { text-align: center; padding: 20px; color: var(--primary2); display: none; }
-.loading-dots { display: inline-block; animation: pulse 1.5s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.error-box { background: #ff6b6b11; border: 1px solid #ff6b6b44; color: #ff6b6b; padding: 12px 16px; border-radius: 8px; margin-top: 10px; display: none; font-size: 14px; }
-.result-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-top: 16px; display: none; }
-.result-card h4 { color: var(--primary2); font-size: 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-.stats-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-.pill { background: var(--bg); border: 1px solid var(--border); padding: 4px 12px; border-radius: 20px; font-size: 12px; color: var(--muted); }
-.pill b { color: var(--primary2); }
-.content-output { background: var(--bg); border-radius: 10px; padding: 20px; border: 1px solid var(--border); line-height: 1.9; font-size: 15px; }
-.content-output h1,.content-output h2,.content-output h3 { color: var(--primary2); margin: 18px 0 10px; }
-.content-output p { margin-bottom: 14px; color: var(--text); }
-.content-output ul,.content-output ol { margin: 8px 0 14px 22px; color: var(--text); }
-.content-output li { margin-bottom: 6px; }
-.content-output strong { color: #fff; }
-.tips-card { background: #0a1f0a; border: 1px solid #2a5a2a; border-radius: 10px; padding: 18px; margin-top: 14px; }
-.tips-card h4 { color: var(--green); font-size: 14px; margin-bottom: 12px; }
-.tips-card ul { margin-left: 18px; color: #86efac; font-size: 13px; line-height: 2; }
-.action-bar { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-.act-btn { padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
-.copy-act { background: var(--primary)22; color: var(--primary2); border: 1px solid var(--primary)44 !important; }
-.regen-act { background: var(--accent)22; color: var(--accent); border: 1px solid var(--accent)44 !important; }
-.save-act { background: var(--green)22; color: var(--green); border: 1px solid var(--green)44 !important; }
+.app{display:none;min-height:100vh;flex-direction:column;position:relative;z-index:1;}
+.app-header{
+  background:rgba(10,0,21,0.9);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:16px 28px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:100;
+}
+.app-logo{
+  font-size:20px;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),var(--purple3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.plan-pill{
+  background:linear-gradient(135deg,rgba(245,197,24,0.1),rgba(124,58,237,0.1));
+  border:1px solid var(--border2);color:var(--gold);
+  padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;
+}
+.app-body{display:flex;flex:1;}
+
+/* SIDEBAR */
+.sidebar{
+  width:220px;
+  background:rgba(10,0,21,0.6);
+  backdrop-filter:blur(20px);
+  border-right:1px solid var(--border);
+  padding:24px 14px;
+  display:flex;flex-direction:column;gap:4px;
+  flex-shrink:0;
+}
+.sidebar-section{
+  font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1.5px;
+  margin:14px 0 6px 8px;
+}
+.sidebar-btn{
+  padding:10px 14px;border-radius:12px;
+  font-size:13px;color:var(--muted);
+  cursor:pointer;display:flex;align-items:center;
+  gap:10px;border:none;background:none;
+  width:100%;text-align:left;transition:all 0.2s;
+  font-family:'Inter',sans-serif;
+}
+.sidebar-btn:hover{
+  background:var(--glass);color:var(--text);
+}
+.sidebar-btn.active{
+  background:linear-gradient(135deg,rgba(245,197,24,0.1),rgba(124,58,237,0.1));
+  color:var(--gold);border:1px solid var(--border2);
+}
+
+/* MAIN */
+.main{flex:1;padding:28px;overflow-y:auto;max-width:920px;}
+.section{display:none;}
+.section.active{display:block;}
+.section-title{
+  font-size:24px;font-weight:800;margin-bottom:4px;
+  background:linear-gradient(135deg,var(--gold),var(--purple3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.section-sub{color:var(--muted);font-size:14px;margin-bottom:24px;}
+
+/* FORM CARDS */
+.form-card{
+  background:var(--glass);backdrop-filter:blur(20px);
+  border:1px solid var(--border);border-radius:20px;
+  padding:24px;margin-bottom:16px;
+}
+.form-card h4{
+  font-size:13px;font-weight:600;
+  color:var(--gold);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+  text-transform:uppercase;letter-spacing:1px;
+}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500;}
+select,textarea,input[type=text]{
+  width:100%;padding:12px 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.04);
+  color:var(--text);font-size:14px;
+  margin-bottom:16px;outline:none;
+  font-family:'Inter',sans-serif;
+  transition:border-color 0.2s;
+  backdrop-filter:blur(10px);
+}
+select:focus,textarea:focus,input:focus{border-color:var(--border2);}
+textarea{resize:vertical;line-height:1.6;}
+
+/* GRIDS */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+
+/* CHIPS */
+.opt{
+  padding:10px 8px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:12px;color:var(--muted);
+  cursor:pointer;text-align:center;font-size:12px;
+  transition:all 0.2s;font-family:'Inter',sans-serif;
+  backdrop-filter:blur(10px);
+}
+.opt:hover{border-color:rgba(245,197,24,0.2);color:var(--text);}
+.opt.at{
+  background:linear-gradient(135deg,rgba(245,197,24,0.1),rgba(124,58,237,0.1));
+  border-color:var(--border2);color:var(--gold);
+  box-shadow:0 0 20px rgba(245,197,24,0.1);
+}
+.opt.att{
+  background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(245,197,24,0.1));
+  border-color:rgba(157,78,221,0.4);color:var(--purple3);
+}
+
+/* GENERATE BUTTON */
+.gen-btn{
+  width:100%;padding:16px;
+  background:linear-gradient(135deg,var(--gold),#e6a800,var(--purple2));
+  color:#0a0015;border:none;border-radius:14px;
+  font-size:16px;font-weight:800;cursor:pointer;
+  letter-spacing:0.5px;margin-top:4px;
+  box-shadow:0 4px 30px rgba(245,197,24,0.3);
+  transition:all 0.3s;font-family:'Inter',sans-serif;
+}
+.gen-btn:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(245,197,24,0.4);}
+.gen-btn:disabled{background:#333;cursor:not-allowed;transform:none;box-shadow:none;color:#666;}
+
+/* LOADING */
+.loading{
+  text-align:center;padding:20px;
+  color:var(--gold);display:none;
+  font-size:15px;font-weight:500;
+}
+.loading-dot{display:inline-block;animation:glow 1.5s infinite;}
+@keyframes glow{0%,100%{opacity:1;text-shadow:0 0 10px var(--gold);}50%{opacity:0.3;text-shadow:none;}}
+
+/* ERROR */
+.err{
+  background:rgba(239,68,68,0.08);
+  border:1px solid rgba(239,68,68,0.2);
+  color:#f87171;padding:12px 16px;
+  border-radius:12px;margin-top:10px;
+  display:none;font-size:14px;
+  backdrop-filter:blur(10px);
+}
+
+/* RESULT */
+.result-card{
+  background:var(--glass);backdrop-filter:blur(20px);
+  border:1px solid var(--border);border-radius:20px;
+  padding:28px;margin-top:16px;display:none;
+}
+.result-card h4{
+  font-size:13px;font-weight:600;color:var(--gold);
+  margin-bottom:16px;text-transform:uppercase;letter-spacing:1px;
+}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.pill{
+  background:rgba(245,197,24,0.08);
+  border:1px solid rgba(245,197,24,0.2);
+  padding:4px 14px;border-radius:20px;
+  font-size:12px;color:var(--gold);font-weight:500;
+}
+.output{
+  background:rgba(255,255,255,0.03);
+  border-radius:14px;padding:24px;
+  border:1px solid var(--border);
+  line-height:1.9;font-size:15px;
+}
+.output h1,.output h2,.output h3{
+  color:var(--gold);margin:18px 0 10px;font-weight:700;
+}
+.output p{margin-bottom:14px;color:var(--text);}
+.output ul,.output ol{margin:8px 0 14px 22px;color:var(--text);}
+.output li{margin-bottom:6px;}
+.output strong{color:#fff;font-weight:700;}
+
+/* TIPS */
+.tips{
+  background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(245,197,24,0.05));
+  border:1px solid rgba(124,58,237,0.2);
+  border-radius:14px;padding:20px;margin-top:14px;
+  backdrop-filter:blur(10px);
+}
+.tips h4{color:var(--purple3);font-size:13px;margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.tips ul{margin-left:18px;color:var(--muted);font-size:13px;line-height:2.2;}
+.tips ul li{color:#c4b5fd;}
+
+/* ACTION BAR */
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.act{
+  padding:10px 20px;border-radius:10px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  border:none;font-family:'Inter',sans-serif;transition:all 0.2s;
+}
+.act-gold{
+  background:rgba(245,197,24,0.1);color:var(--gold);
+  border:1px solid rgba(245,197,24,0.2)!important;
+}
+.act-gold:hover{background:rgba(245,197,24,0.15);}
+.act-purple{
+  background:rgba(124,58,237,0.1);color:var(--purple3);
+  border:1px solid rgba(124,58,237,0.2)!important;
+}
+.act-green{
+  background:rgba(74,222,128,0.1);color:#4ade80;
+  border:1px solid rgba(74,222,128,0.2)!important;
+}
 
 /* HISTORY */
-.history-empty { text-align: center; padding: 60px 20px; color: var(--muted); }
-.history-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.2s; }
-.history-item:hover { border-color: var(--primary)55; }
-.history-item h4 { font-size: 15px; margin-bottom: 6px; }
-.history-item p { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.history-meta { display: flex; gap: 10px; margin-top: 8px; }
-.history-tag { background: var(--primary)22; color: var(--primary2); padding: 2px 10px; border-radius: 20px; font-size: 11px; }
+.h-empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.h-item{
+  background:var(--glass);backdrop-filter:blur(10px);
+  border:1px solid var(--border);border-radius:16px;
+  padding:20px;margin-bottom:12px;cursor:pointer;
+  transition:all 0.2s;
+}
+.h-item:hover{border-color:var(--border2);transform:translateY(-2px);}
+.h-item h4{font-size:15px;margin-bottom:6px;color:var(--text);}
+.h-item p{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.h-tags{display:flex;gap:8px;margin-top:10px;}
+.h-tag{
+  background:rgba(245,197,24,0.08);
+  border:1px solid rgba(245,197,24,0.15);
+  color:var(--gold);padding:3px 10px;
+  border-radius:20px;font-size:11px;font-weight:500;
+}
 
 /* MUSE */
-.muse-output { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-top: 16px; display: none; }
-.muse-idea { background: var(--bg); border-left: 3px solid var(--primary); padding: 14px 16px; border-radius: 0 8px 8px 0; margin-bottom: 12px; font-size: 14px; line-height: 1.7; color: var(--text); }
+.muse-idea{
+  background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(245,197,24,0.05));
+  border-left:3px solid var(--gold);
+  padding:16px 18px;border-radius:0 12px 12px 0;
+  margin-bottom:12px;font-size:14px;line-height:1.8;
+  color:var(--text);backdrop-filter:blur(10px);
+}
 
 /* SETTINGS */
-.settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); }
-.settings-row:last-child { border-bottom: none; }
-.settings-label { font-size: 14px; }
-.settings-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
-.toggle { width: 44px; height: 24px; background: var(--border); border-radius: 12px; cursor: pointer; position: relative; transition: background 0.3s; border: none; }
-.toggle.on { background: var(--primary); }
-.toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: left 0.3s; }
-.toggle.on::after { left: 23px; }
+.set-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 0;border-bottom:1px solid var(--border);
+}
+.set-row:last-child{border-bottom:none;}
+.set-label{font-size:14px;font-weight:500;}
+.set-desc{font-size:12px;color:var(--muted);margin-top:3px;}
+.toggle{
+  width:46px;height:26px;
+  background:rgba(255,255,255,0.1);
+  border-radius:13px;cursor:pointer;
+  position:relative;transition:background 0.3s;border:none;
+}
+.toggle.on{background:linear-gradient(135deg,var(--gold),var(--purple2));}
+.toggle::after{
+  content:'';position:absolute;
+  width:20px;height:20px;background:#fff;
+  border-radius:50%;top:3px;left:3px;transition:left 0.3s;
+}
+.toggle.on::after{left:23px;}
 
-@media(max-width:600px) {
-  .nav { padding: 14px 16px; }
-  .sidebar { display: none; }
-  .main { padding: 16px; }
-  .grid2 { grid-template-columns: 1fr; }
-  .grid3 { grid-template-columns: repeat(2,1fr); }
-  .hero h1 { font-size: 28px; }
-  .pricing-cards { flex-direction: column; align-items: center; }
+@media(max-width:640px){
+  .nav{padding:14px 16px;}
+  .sidebar{display:none;}
+  .main{padding:16px;}
+  .grid2{grid-template-columns:1fr;}
+  .grid3{grid-template-columns:repeat(2,1fr);}
+  .hero h1{font-size:32px;letter-spacing:-1px;}
+  .pricing-cards{flex-direction:column;align-items:center;}
+  .hero-btns{flex-direction:column;align-items:center;}
 }
 </style>
 </head>
 <body>
 
-<!-- LANDING PAGE -->
+<!-- LANDING -->
 <div class="landing" id="landing">
   <nav class="nav">
     <div class="logo">✍️ SozoWrite</div>
     <div class="nav-links">
-      <button class="nav-link" onclick="scrollTo(0,600)">Features</button>
-      <button class="nav-link" onclick="scrollTo(0,1200)">Pricing</button>
-      <button class="btn-primary" onclick="openApp('free')">Start Free →</button>
+      <button class="nav-btn" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">Pricing</button>
+      <button class="btn-gold" onclick="openApp('free')">Start Free →</button>
     </div>
   </nav>
 
   <div class="hero">
-    <div class="hero-badge">🌍 Now supporting 20+ languages including African languages</div>
-    <h1>Where Ideas<br><span>Become Whole</span></h1>
-    <p>The international AI writing assistant built for every writer, in every language, on every continent. Beautiful, powerful, and human-first.</p>
+    <div class="hero-badge">✦ Now live — 20+ languages including African languages</div>
+    <h1>
+      <div class="line1">Where Ideas</div>
+      <div class="line2">Become Whole</div>
+    </h1>
+    <p>The world-class AI writing assistant built for every writer, in every language, on every continent. Beautiful, powerful, and human-first.</p>
     <div class="hero-btns">
-      <button class="btn-primary" style="padding:14px 32px;font-size:16px" onclick="openApp('free')">✨ Start Writing Free</button>
-      <button class="btn-outline" style="padding:14px 32px;font-size:16px" onclick="openApp('pro')">⭐ Go Pro</button>
+      <button class="btn-gold" style="padding:16px 36px;font-size:16px" onclick="openApp('free')">✨ Start Writing Free</button>
+      <button class="btn-outline-gold" style="padding:16px 36px;font-size:16px" onclick="openApp('pro')">⭐ Go Pro</button>
     </div>
-    <div class="features-row">
-      <div class="feature-chip"><span>🌍</span> 20+ Languages</div>
-      <div class="feature-chip"><span>🤖</span> AI + Human Tips</div>
-      <div class="feature-chip"><span>📝</span> 10 Content Types</div>
-      <div class="feature-chip"><span>💡</span> Muse Mode</div>
-      <div class="feature-chip"><span>📚</span> Project History</div>
+    <div class="chips">
+      <div class="chip-item"><span>🌍</span> 20+ Languages</div>
+      <div class="chip-item"><span>✦</span> AI + Human Tips</div>
+      <div class="chip-item"><span>📝</span> 10 Content Types</div>
+      <div class="chip-item"><span>💡</span> Muse Mode</div>
+      <div class="chip-item"><span>📚</span> Project History</div>
     </div>
-    <div class="stats-row">
-      <div class="stat-item"><div class="num">20+</div><div class="label">Languages</div></div>
-      <div class="stat-item"><div class="num">10+</div><div class="label">Content Types</div></div>
-      <div class="stat-item"><div class="num">6</div><div class="label">Tone Modes</div></div>
-      <div class="stat-item"><div class="num">100%</div><div class="label">Free to Start</div></div>
+    <div class="stats">
+      <div class="stat"><div class="num">20+</div><div class="label">Languages</div></div>
+      <div class="stat"><div class="num">10+</div><div class="label">Content Types</div></div>
+      <div class="stat"><div class="num">6</div><div class="label">Tone Modes</div></div>
+      <div class="stat"><div class="num">100%</div><div class="label">Free to Start</div></div>
     </div>
   </div>
 
-  <div class="pricing-section" id="pricing">
+  <div class="pricing" id="pricing">
     <h2>Simple, Fair Pricing</h2>
-    <p>Start free. Upgrade when you're ready. No hidden fees.</p>
+    <p>Start free. Upgrade when you're ready. No surprises.</p>
     <div class="pricing-cards">
-      <div class="pricing-card">
+      <div class="price-card glass">
         <h3>Free</h3>
-        <div class="price">$0 <span>/forever</span></div>
+        <div class="amount">$0</div>
+        <div class="per">forever</div>
         <ul>
           <li>10 generations/day</li>
           <li>5 content types</li>
           <li>English only</li>
-          <li>Basic tone control</li>
-          <li>Project history (7 days)</li>
+          <li>Basic tones</li>
+          <li>7-day history</li>
         </ul>
-        <button class="plan-btn free-btn" onclick="openApp('free')">Start Free</button>
+        <button class="plan-btn plan-btn-glass" onclick="openApp('free')">Start Free</button>
       </div>
-      <div class="pricing-card popular">
-        <div class="popular-badge">⭐ Most Popular</div>
+      <div class="price-card featured">
+        <div class="featured-badge">⭐ Most Popular</div>
         <h3>Pro</h3>
-        <div class="price">$9 <span>/month</span></div>
+        <div class="amount">$9</div>
+        <div class="per">per month</div>
         <ul>
           <li>Unlimited generations</li>
           <li>All 10 content types</li>
@@ -217,11 +549,12 @@ textarea { resize: vertical; line-height: 1.6; }
           <li>Full project history</li>
           <li>Priority support</li>
         </ul>
-        <button class="plan-btn pro-btn" onclick="openApp('pro')">Go Pro →</button>
+        <button class="plan-btn plan-btn-gold" onclick="openApp('pro')">Go Pro →</button>
       </div>
-      <div class="pricing-card">
+      <div class="price-card glass">
         <h3>Team</h3>
-        <div class="price">$29 <span>/month</span></div>
+        <div class="amount">$29</div>
+        <div class="per">per month</div>
         <ul>
           <li>Everything in Pro</li>
           <li>5 team members</li>
@@ -230,7 +563,7 @@ textarea { resize: vertical; line-height: 1.6; }
           <li>API access</li>
           <li>Analytics dashboard</li>
         </ul>
-        <button class="plan-btn free-btn" onclick="openApp('pro')">Contact Us</button>
+        <button class="plan-btn plan-btn-glass" onclick="openApp('pro')">Contact Us</button>
       </div>
     </div>
   </div>
@@ -241,18 +574,18 @@ textarea { resize: vertical; line-height: 1.6; }
   <div class="app-header">
     <div class="app-logo">✍️ SozoWrite</div>
     <div style="display:flex;align-items:center;gap:12px">
-      <div class="plan-tag" id="planTag">Free Plan</div>
-      <button class="btn-primary" style="font-size:13px;padding:8px 16px" onclick="showLanding()">⭐ Upgrade</button>
+      <div class="plan-pill" id="planPill">✦ Free Plan</div>
+      <button class="btn-gold" style="font-size:13px;padding:8px 18px" onclick="showLanding()">⭐ Upgrade</button>
     </div>
   </div>
   <div class="app-body">
     <div class="sidebar">
-      <div class="sidebar-title">Create</div>
+      <div class="sidebar-section">Create</div>
       <button class="sidebar-btn active" onclick="showSection('write',this)">✍️ Write</button>
       <button class="sidebar-btn" onclick="showSection('muse',this)">💡 Muse Mode</button>
-      <div class="sidebar-title">Manage</div>
+      <div class="sidebar-section">Manage</div>
       <button class="sidebar-btn" onclick="showSection('history',this)">📚 History</button>
-      <div class="sidebar-title">Account</div>
+      <div class="sidebar-section">Account</div>
       <button class="sidebar-btn" onclick="showSection('settings',this)">⚙️ Settings</button>
       <button class="sidebar-btn" onclick="showLanding()" style="margin-top:auto">🏠 Home</button>
     </div>
@@ -265,63 +598,53 @@ textarea { resize: vertical; line-height: 1.6; }
         <div class="section-sub">Create powerful content in any language, any tone</div>
 
         <div class="form-card">
-          <h4>📝 Content Type</h4>
+          <h4>✦ Content Type</h4>
           <div class="grid3" id="typeGrid">
-            <div class="chip active-type" onclick="selectType(this,'Blog Post')">📝 Blog Post</div>
-            <div class="chip" onclick="selectType(this,'Social Media')">📱 Social Media</div>
-            <div class="chip" onclick="selectType(this,'Product Description')">🛍️ Product Desc</div>
-            <div class="chip" onclick="selectType(this,'Email')">📧 Email</div>
-            <div class="chip" onclick="selectType(this,'Essay')">🎓 Essay</div>
-            <div class="chip" onclick="selectType(this,'News Article')">📰 News Article</div>
-            <div class="chip" onclick="selectType(this,'Cover Letter')">💼 Cover Letter</div>
-            <div class="chip" onclick="selectType(this,'Story')">📖 Story</div>
-            <div class="chip" onclick="selectType(this,'Ad Copy')">📢 Ad Copy</div>
+            <div class="opt at" onclick="sel(this,'typeGrid','at','Blog Post')">📝 Blog Post</div>
+            <div class="opt" onclick="sel(this,'typeGrid','at','Social Media')">📱 Social Media</div>
+            <div class="opt" onclick="sel(this,'typeGrid','at','Product Description')">🛍️ Product Desc</div>
+            <div class="opt" onclick="sel(this,'typeGrid','at','Email')">📧 Email</div>
+            <div class="opt" onclick="sel(this,'typeGrid','at','Essay')">🎓 Essay</div>
+            <div class="opt" onclick="sel(this,'typeGrid','at','News Article')">📰 News Article</div>
+            <div class="opt" onclick="sel(this,'typeGrid','at','Cover Letter')">💼 Cover Letter</div>
+            <div class="opt" onclick="sel(this,'typeGrid','at','Story')">📖 Story</div>
+            <div class="opt" onclick="sel(this,'typeGrid','at','Ad Copy')">📢 Ad Copy</div>
           </div>
         </div>
 
         <div class="form-card">
-          <h4>🎭 Tone</h4>
+          <h4>✦ Tone</h4>
           <div class="grid3" id="toneGrid">
-            <div class="chip active-tone" onclick="selectTone(this,'Professional')">💼 Professional</div>
-            <div class="chip" onclick="selectTone(this,'Casual')">😊 Casual</div>
-            <div class="chip" onclick="selectTone(this,'Persuasive')">🔥 Persuasive</div>
-            <div class="chip" onclick="selectTone(this,'Funny')">😂 Funny</div>
-            <div class="chip" onclick="selectTone(this,'Inspirational')">⭐ Inspirational</div>
-            <div class="chip" onclick="selectTone(this,'Formal')">🎩 Formal</div>
+            <div class="opt att" onclick="sel(this,'toneGrid','att','Professional')">💼 Professional</div>
+            <div class="opt" onclick="sel(this,'toneGrid','att','Casual')">😊 Casual</div>
+            <div class="opt" onclick="sel(this,'toneGrid','att','Persuasive')">🔥 Persuasive</div>
+            <div class="opt" onclick="sel(this,'toneGrid','att','Funny')">😂 Funny</div>
+            <div class="opt" onclick="sel(this,'toneGrid','att','Inspirational')">⭐ Inspirational</div>
+            <div class="opt" onclick="sel(this,'toneGrid','att','Formal')">🎩 Formal</div>
           </div>
         </div>
 
         <div class="form-card">
-          <h4>⚙️ Settings</h4>
+          <h4>✦ Settings</h4>
           <div class="grid2">
             <div>
               <label>🌍 Language</label>
-              <select id="language">
-                <option>English</option>
-                <option>French</option>
-                <option>Spanish</option>
-                <option>Arabic</option>
-                <option>Portuguese</option>
-                <option>Swahili</option>
-                <option>Hausa</option>
-                <option>Yoruba</option>
-                <option>Igbo</option>
-                <option>Amharic</option>
-                <option>Zulu</option>
-                <option>German</option>
-                <option>Chinese</option>
-                <option>Hindi</option>
-                <option>Japanese</option>
-                <option>Russian</option>
-                <option>Italian</option>
-                <option>Dutch</option>
-                <option>Turkish</option>
-                <option>Nigerian Pidgin</option>
+              <select id="lang">
+                <option>English</option><option>French</option>
+                <option>Spanish</option><option>Arabic</option>
+                <option>Portuguese</option><option>Swahili</option>
+                <option>Hausa</option><option>Yoruba</option>
+                <option>Igbo</option><option>Amharic</option>
+                <option>Zulu</option><option>German</option>
+                <option>Chinese</option><option>Hindi</option>
+                <option>Japanese</option><option>Russian</option>
+                <option>Italian</option><option>Dutch</option>
+                <option>Turkish</option><option>Nigerian Pidgin</option>
               </select>
             </div>
             <div>
               <label>📏 Length</label>
-              <select id="length">
+              <select id="len">
                 <option value="short (150-250 words)">Short</option>
                 <option value="medium (400-600 words)" selected>Medium</option>
                 <option value="long (800-1200 words)">Long</option>
@@ -335,49 +658,51 @@ textarea { resize: vertical; line-height: 1.6; }
         </div>
 
         <button class="gen-btn" onclick="generate()" id="genBtn">✨ Generate with SozoWrite</button>
-        <div class="loading" id="loading"><div class="loading-dots">🤖 SozoWrite is crafting your content...</div></div>
-        <div class="error-box" id="errorBox"></div>
+        <div class="loading" id="load"><div class="loading-dot">✦ SozoWrite is crafting your masterpiece...</div></div>
+        <div class="err" id="err"></div>
 
-        <div class="result-card" id="resultCard">
-          <h4>📄 Your Content</h4>
-          <div class="stats-pills" id="statsPills"></div>
-          <div class="content-output" id="contentOutput"></div>
-          <div class="tips-card" id="tipsCard">
-            <h4>💡 Human Touch Tips — Make It Yours</h4>
+        <div class="result-card" id="resCard">
+          <h4>✦ Your Content</h4>
+          <div class="pills" id="pills"></div>
+          <div class="output" id="output"></div>
+          <div class="tips" id="tipsBox">
+            <h4>💡 Human Touch — Make It Yours</h4>
             <ul id="tipsList"></ul>
           </div>
-          <div class="action-bar">
-            <button class="act-btn copy-act" onclick="copyContent()">📋 Copy</button>
-            <button class="act-btn regen-act" onclick="generate()">🔄 Regenerate</button>
-            <button class="act-btn save-act" onclick="saveToHistory()">💾 Save</button>
+          <div class="actions">
+            <button class="act act-gold" onclick="copyIt()">📋 Copy</button>
+            <button class="act act-purple" onclick="generate()">🔄 Regenerate</button>
+            <button class="act act-green" onclick="saveIt()">💾 Save</button>
           </div>
         </div>
       </div>
 
-      <!-- MUSE MODE -->
+      <!-- MUSE -->
       <div class="section" id="section-muse">
         <div class="section-title">💡 Muse Mode</div>
-        <div class="section-sub">Stuck? Let SozoWrite spark your creativity</div>
+        <div class="section-sub">Stuck? Let SozoWrite ignite your creativity</div>
         <div class="form-card">
-          <h4>🎯 What are you working on?</h4>
-          <label>Describe your project, theme, or problem</label>
+          <h4>✦ What Are You Working On?</h4>
+          <label>Describe your project or problem</label>
           <textarea id="museTopic" rows="4" placeholder="e.g. I want to write about climate change in Africa but don't know where to start..."></textarea>
           <label>🌍 Language</label>
-          <select id="museLanguage">
+          <select id="museLang">
             <option>English</option><option>French</option><option>Spanish</option>
             <option>Swahili</option><option>Hausa</option><option>Yoruba</option>
             <option>Igbo</option><option>Portuguese</option><option>Arabic</option>
             <option>Nigerian Pidgin</option>
           </select>
           <label>🔑 API Key</label>
-          <input type="text" id="museApikey" value="test-key-123"/>
+          <input type="text" id="museKey" value="test-key-123"/>
           <button class="gen-btn" onclick="runMuse()" id="museBtn">💡 Spark My Ideas</button>
-          <div class="loading" id="museLoading"><div class="loading-dots">💭 Muse is thinking...</div></div>
-          <div class="error-box" id="museError"></div>
+          <div class="loading" id="museLoad"><div class="loading-dot">✦ Muse is thinking...</div></div>
+          <div class="err" id="museErr"></div>
         </div>
-        <div class="muse-output" id="museOutput">
-          <h4 style="color:var(--primary2);margin-bottom:16px">✨ Your Creative Sparks</h4>
-          <div id="museIdeas"></div>
+        <div id="museOut" style="display:none">
+          <div class="form-card">
+            <h4>✨ Your Creative Sparks</h4>
+            <div id="museIdeas"></div>
+          </div>
         </div>
       </div>
 
@@ -385,7 +710,7 @@ textarea { resize: vertical; line-height: 1.6; }
       <div class="section" id="section-history">
         <div class="section-title">📚 History</div>
         <div class="section-sub">Your saved writing projects</div>
-        <div id="historyList"></div>
+        <div id="histList"></div>
       </div>
 
       <!-- SETTINGS -->
@@ -393,27 +718,27 @@ textarea { resize: vertical; line-height: 1.6; }
         <div class="section-title">⚙️ Settings</div>
         <div class="section-sub">Customize your SozoWrite experience</div>
         <div class="form-card">
-          <div class="settings-row">
-            <div><div class="settings-label">🌙 Dark Mode</div><div class="settings-desc">Always on for best writing experience</div></div>
+          <div class="set-row">
+            <div><div class="set-label">🌙 Dark Mode</div><div class="set-desc">Premium dark experience</div></div>
             <button class="toggle on"></button>
           </div>
-          <div class="settings-row">
-            <div><div class="settings-label">💡 Show Human Tips</div><div class="settings-desc">Get improvement suggestions after generation</div></div>
-            <button class="toggle on" id="tipsToggle" onclick="this.classList.toggle('on')"></button>
+          <div class="set-row">
+            <div><div class="set-label">💡 Human Tips</div><div class="set-desc">Show improvement suggestions</div></div>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
           </div>
-          <div class="settings-row">
-            <div><div class="settings-label">📊 Word Count Stats</div><div class="settings-desc">Show stats after each generation</div></div>
-            <button class="toggle on" id="statsToggle" onclick="this.classList.toggle('on')"></button>
+          <div class="set-row">
+            <div><div class="set-label">📊 Word Stats</div><div class="set-desc">Show stats after generation</div></div>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
           </div>
-          <div class="settings-row">
-            <div><div class="settings-label">💾 Auto-Save</div><div class="settings-desc">Automatically save generations to history</div></div>
+          <div class="set-row">
+            <div><div class="set-label">💾 Auto-Save</div><div class="set-desc">Auto save to history</div></div>
             <button class="toggle" id="autoSave" onclick="this.classList.toggle('on')"></button>
           </div>
         </div>
         <div class="form-card" style="margin-top:16px">
-          <h4>📋 Your Plan</h4>
-          <div id="planInfo" style="color:var(--muted);font-size:14px;line-height:2"></div>
-          <button class="gen-btn" style="margin-top:12px" onclick="showLanding()">⭐ Upgrade to Pro</button>
+          <h4>✦ Your Plan</h4>
+          <div id="planInfo" style="color:var(--muted);font-size:14px;line-height:2.2"></div>
+          <button class="gen-btn" style="margin-top:16px" onclick="showLanding()">⭐ Upgrade to Pro</button>
         </div>
       </div>
 
@@ -423,201 +748,165 @@ textarea { resize: vertical; line-height: 1.6; }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <script>
-let selectedType = 'Blog Post';
-let selectedTone = 'Professional';
-let rawText = '';
-let history = JSON.parse(localStorage.getItem('sozoHistory') || '[]');
-let currentPlan = 'free';
+let sType='Blog Post',sTone='Professional',raw='';
+let hist=JSON.parse(localStorage.getItem('sz_hist')||'[]');
+let plan='free';
 
-function openApp(plan) {
-  currentPlan = plan;
-  document.getElementById('landing').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  document.getElementById('planTag').textContent = plan === 'pro' ? '⭐ Pro Plan' : 'Free Plan';
-  document.getElementById('planInfo').innerHTML = plan === 'pro'
-    ? '⭐ Pro Plan<br>✓ Unlimited generations<br>✓ All languages<br>✓ All features'
-    : '🆓 Free Plan<br>✓ 10 generations/day<br>✓ English only<br><a href="#" onclick="showLanding()" style="color:var(--primary2)">Upgrade for more →</a>';
-  renderHistory();
+function openApp(p){
+  plan=p;
+  document.getElementById('landing').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('planPill').textContent=p==='pro'?'⭐ Pro Plan':'✦ Free Plan';
+  document.getElementById('planInfo').innerHTML=p==='pro'
+    ?'⭐ Pro Plan<br>✦ Unlimited generations<br>✦ All languages & features<br>✦ Priority support'
+    :'✦ Free Plan<br>✦ 10 generations/day<br>✦ English only<br><a href="#" onclick="showLanding()" style="color:var(--gold)">Upgrade for unlimited →</a>';
+  renderHist();
 }
 
-function showLanding() {
-  document.getElementById('landing').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
+function showLanding(){
+  document.getElementById('landing').style.display='flex';
+  document.getElementById('app').style.display='none';
 }
 
-function showSection(name, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('section-' + name).classList.add('active');
+function showSection(n,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-'+n).classList.add('active');
   btn.classList.add('active');
-  if (name === 'history') renderHistory();
+  if(n==='history')renderHist();
 }
 
-function selectType(el, type) {
-  document.querySelectorAll('#typeGrid .chip').forEach(c => c.classList.remove('active-type'));
-  el.classList.add('active-type');
-  selectedType = type;
+function sel(el,grid,cls,val){
+  document.querySelectorAll('#'+grid+' .opt').forEach(o=>o.classList.remove('at','att'));
+  el.classList.add(cls);
+  if(grid==='typeGrid')sType=val;
+  else sTone=val;
 }
 
-function selectTone(el, tone) {
-  document.querySelectorAll('#toneGrid .chip').forEach(c => c.classList.remove('active-tone'));
-  el.classList.add('active-tone');
-  selectedTone = tone;
-}
-
-function getTips(type, tone, lang) {
-  const tips = [
+function tips(type,tone,lang){
+  let t=[
     'Add a personal story or real experience to make it feel authentic',
     'Replace generic phrases with specific numbers, names, or facts',
     'Read it aloud — rewrite anything that sounds unnatural',
     'Add a clear call-to-action that tells readers what to do next',
     'Break any paragraph longer than 4 lines into two shorter ones',
   ];
-  if (tone === 'Funny') tips.push('Add one unexpected twist or punchline to surprise the reader');
-  if (type === 'Blog Post') tips.push('Add 2-3 subheadings to improve SEO and scannability');
-  if (type === 'Social Media') tips.push('Add 3-5 relevant hashtags and an emoji in the first line');
-  if (type === 'Email') tips.push('Rewrite your subject line to create curiosity or urgency');
-  if (lang !== 'English') tips.push(`Have a native ${lang} speaker review for cultural accuracy`);
-  return tips.slice(0, 5);
+  if(tone==='Funny')t.push('Add one unexpected twist or punchline');
+  if(type==='Blog Post')t.push('Add 2-3 subheadings to improve SEO');
+  if(type==='Social Media')t.push('Add 3-5 hashtags and an emoji in the first line');
+  if(type==='Email')t.push('Rewrite your subject line to create curiosity');
+  if(lang!=='English')t.push(`Have a native ${lang} speaker review for cultural accuracy`);
+  return t.slice(0,5);
 }
 
-async function generate() {
-  const topic = document.getElementById('topic').value.trim();
-  const apikey = document.getElementById('apikey').value.trim();
-  const language = document.getElementById('language').value;
-  const length = document.getElementById('length').value;
-  if (!topic) { showError('errorBox', 'Please enter a topic!'); return; }
-  const prompt = `Write a ${selectedTone.toLowerCase()} ${selectedType.toLowerCase()} about: "${topic}".
-Length: ${length}. Language: Write entirely in ${language}.
-Make it engaging, well-structured, and human-sounding with proper formatting.`;
-
-  document.getElementById('genBtn').disabled = true;
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('errorBox').style.display = 'none';
-  document.getElementById('resultCard').style.display = 'none';
-
-  try {
-    const res = await fetch('/aggregate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-API-Key': apikey || 'test-key-123' },
-      body: JSON.stringify({ prompt })
+async function generate(){
+  const topic=document.getElementById('topic').value.trim();
+  const apikey=document.getElementById('apikey').value.trim();
+  const lang=document.getElementById('lang').value;
+  const len=document.getElementById('len').value;
+  if(!topic){showErr('err','Please enter a topic!');return;}
+  const prompt=`Write a ${sTone.toLowerCase()} ${sType.toLowerCase()} about: "${topic}". Length: ${len}. Language: Write entirely in ${lang}. Make it engaging, well-structured, and human-sounding with proper formatting.`;
+  document.getElementById('genBtn').disabled=true;
+  document.getElementById('load').style.display='block';
+  document.getElementById('err').style.display='none';
+  document.getElementById('resCard').style.display='none';
+  try{
+    const r=await fetch('/aggregate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-API-Key':apikey||'test-key-123'},
+      body:JSON.stringify({prompt})
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Error occurred');
-    rawText = data.content;
-    const words = rawText.split(/\s+/).length;
-    const readTime = Math.ceil(words / 200);
-
-    document.getElementById('statsPills').innerHTML = `
-      <div class="pill">Words: <b>${words}</b></div>
-      <div class="pill">Read: <b>${readTime} min</b></div>
-      <div class="pill">Type: <b>${selectedType}</b></div>
-      <div class="pill">Tone: <b>${selectedTone}</b></div>
-      <div class="pill">Lang: <b>${language}</b></div>`;
-
-    document.getElementById('contentOutput').innerHTML = marked.parse(rawText);
-    const tips = getTips(selectedType, selectedTone, language);
-    document.getElementById('tipsList').innerHTML = tips.map(t => `<li>${t}</li>`).join('');
-    document.getElementById('resultCard').style.display = 'block';
-
-    if (document.getElementById('autoSave').classList.contains('on')) saveToHistory(true);
-  } catch(e) { showError('errorBox', e.message); }
-  finally {
-    document.getElementById('genBtn').disabled = false;
-    document.getElementById('loading').style.display = 'none';
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||'Error occurred');
+    raw=d.content;
+    const wc=raw.split(/\s+/).length;
+    const rt=Math.ceil(wc/200);
+    document.getElementById('pills').innerHTML=
+      `<div class="pill">✦ ${wc} words</div>
+       <div class="pill">✦ ${rt} min read</div>
+       <div class="pill">✦ ${sType}</div>
+       <div class="pill">✦ ${sTone}</div>
+       <div class="pill">✦ ${lang}</div>`;
+    document.getElementById('output').innerHTML=marked.parse(raw);
+    document.getElementById('tipsList').innerHTML=tips(sType,sTone,lang).map(t=>`<li>${t}</li>`).join('');
+    document.getElementById('resCard').style.display='block';
+    if(document.getElementById('autoSave').classList.contains('on'))saveIt(true);
+  }catch(e){showErr('err',e.message);}
+  finally{
+    document.getElementById('genBtn').disabled=false;
+    document.getElementById('load').style.display='none';
   }
 }
 
-async function runMuse() {
-  const topic = document.getElementById('museTopic').value.trim();
-  const apikey = document.getElementById('museApikey').value.trim();
-  const lang = document.getElementById('museLanguage').value;
-  if (!topic) { showError('museError', 'Please describe what you need help with!'); return; }
-
-  const prompt = `You are a creative writing muse. Generate 5 unique, inspiring, and specific creative ideas for: "${topic}".
-Language: ${lang}. Format each idea on a new line starting with a number and emoji.
-Make each idea specific, actionable, and exciting — not generic.`;
-
-  document.getElementById('museBtn').disabled = true;
-  document.getElementById('museLoading').style.display = 'block';
-  document.getElementById('museError').style.display = 'none';
-  document.getElementById('museOutput').style.display = 'none';
-
-  try {
-    const res = await fetch('/aggregate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-API-Key': apikey || 'test-key-123' },
-      body: JSON.stringify({ prompt })
+async function runMuse(){
+  const topic=document.getElementById('museTopic').value.trim();
+  const apikey=document.getElementById('museKey').value.trim();
+  const lang=document.getElementById('museLang').value;
+  if(!topic){showErr('museErr','Please describe what you need help with!');return;}
+  const prompt=`You are a creative writing muse. Generate 5 unique, inspiring, specific creative ideas for: "${topic}". Language: ${lang}. Format each on a new line starting with a number and emoji. Make each idea specific and exciting.`;
+  document.getElementById('museBtn').disabled=true;
+  document.getElementById('museLoad').style.display='block';
+  document.getElementById('museErr').style.display='none';
+  document.getElementById('museOut').style.display='none';
+  try{
+    const r=await fetch('/aggregate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-API-Key':apikey||'test-key-123'},
+      body:JSON.stringify({prompt})
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Error');
-    const ideas = data.content.split('\n').filter(l => l.trim());
-    document.getElementById('museIdeas').innerHTML = ideas.map(i =>
-      `<div class="muse-idea">${i}</div>`).join('');
-    document.getElementById('museOutput').style.display = 'block';
-  } catch(e) { showError('museError', e.message); }
-  finally {
-    document.getElementById('museBtn').disabled = false;
-    document.getElementById('museLoading').style.display = 'none';
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||'Error');
+    const ideas=d.content.split('\n').filter(l=>l.trim());
+    document.getElementById('museIdeas').innerHTML=ideas.map(i=>`<div class="muse-idea">${i}</div>`).join('');
+    document.getElementById('museOut').style.display='block';
+  }catch(e){showErr('museErr',e.message);}
+  finally{
+    document.getElementById('museBtn').disabled=false;
+    document.getElementById('museLoad').style.display='none';
   }
 }
 
-function saveToHistory(auto = false) {
-  const topic = document.getElementById('topic').value.trim();
-  if (!rawText) return;
-  const item = {
-    id: Date.now(),
-    topic: topic || 'Untitled',
-    type: selectedType,
-    tone: selectedTone,
-    language: document.getElementById('language').value,
-    content: rawText,
-    date: new Date().toLocaleDateString()
-  };
-  history.unshift(item);
-  if (history.length > 50) history = history.slice(0, 50);
-  localStorage.setItem('sozoHistory', JSON.stringify(history));
-  if (!auto) alert('✅ Saved to history!');
+function saveIt(auto=false){
+  const topic=document.getElementById('topic').value.trim();
+  if(!raw)return;
+  const item={id:Date.now(),topic:topic||'Untitled',type:sType,tone:sTone,lang:document.getElementById('lang').value,content:raw,date:new Date().toLocaleDateString()};
+  hist.unshift(item);
+  if(hist.length>50)hist=hist.slice(0,50);
+  localStorage.setItem('sz_hist',JSON.stringify(hist));
+  if(!auto)alert('✦ Saved to history!');
 }
 
-function renderHistory() {
-  const list = document.getElementById('historyList');
-  if (history.length === 0) {
-    list.innerHTML = '<div class="history-empty">📭 No saved projects yet.<br>Write something and save it!</div>';
-    return;
-  }
-  list.innerHTML = history.map(item => `
-    <div class="history-item" onclick="loadHistory(${item.id})">
-      <h4>${item.topic}</h4>
-      <p>${item.content.substring(0, 100)}...</p>
-      <div class="history-meta">
-        <span class="history-tag">${item.type}</span>
-        <span class="history-tag">${item.language}</span>
-        <span class="history-tag">${item.date}</span>
+function renderHist(){
+  const el=document.getElementById('histList');
+  if(hist.length===0){el.innerHTML='<div class="h-empty">✦ No saved projects yet.<br>Write something and save it!</div>';return;}
+  el.innerHTML=hist.map(h=>`
+    <div class="h-item" onclick="loadHist(${h.id})">
+      <h4>${h.topic}</h4>
+      <p>${h.content.substring(0,100)}...</p>
+      <div class="h-tags">
+        <span class="h-tag">${h.type}</span>
+        <span class="h-tag">${h.lang}</span>
+        <span class="h-tag">${h.date}</span>
       </div>
     </div>`).join('');
 }
 
-function loadHistory(id) {
-  const item = history.find(h => h.id === id);
-  if (!item) return;
-  rawText = item.content;
-  document.getElementById('topic').value = item.topic;
-  document.getElementById('contentOutput').innerHTML = marked.parse(item.content);
-  document.getElementById('resultCard').style.display = 'block';
-  showSection('write', document.querySelector('.sidebar-btn'));
-  document.querySelectorAll('.sidebar-btn')[0].classList.add('active');
+function loadHist(id){
+  const h=hist.find(x=>x.id===id);
+  if(!h)return;
+  raw=h.content;
+  document.getElementById('topic').value=h.topic;
+  document.getElementById('output').innerHTML=marked.parse(h.content);
+  document.getElementById('resCard').style.display='block';
+  showSection('write',document.querySelectorAll('.sidebar-btn')[0]);
 }
 
-function copyContent() {
-  navigator.clipboard.writeText(rawText);
-  alert('✅ Copied to clipboard!');
-}
+function copyIt(){navigator.clipboard.writeText(raw);alert('✦ Copied to clipboard!');}
 
-function showError(id, msg) {
-  const el = document.getElementById(id);
-  el.textContent = '❌ ' + msg;
-  el.style.display = 'block';
+function showErr(id,msg){
+  const el=document.getElementById(id);
+  el.textContent='✦ '+msg;
+  el.style.display='block';
 }
 </script>
 </body>
